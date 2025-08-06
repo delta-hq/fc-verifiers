@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: #f9fafb;
+  color: #000000;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+}
+
+/* Better text contrast */
+.text-gray-500 {
+  color: #374151 !important;
+}
+
+.text-sm {
+  font-size: 16px !important;
+}
+
+/* Status indicators with animations */
+.status-running {
+  color: #000;
+  font-weight: 600;
+}
+
+.status-running::before {
+  content: '⏳ ';
+  animation: spin 2s linear infinite;
+  display: inline-block;
+}
+
+.status-completed {
+  color: #059669;
+  font-weight: 600;
+}
+
+.status-completed::before {
+  content: '✅ ';
+}
+
+.status-failed {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.status-failed::before {
+  content: '❌ ';
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

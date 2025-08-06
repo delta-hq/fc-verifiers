@@ -890,26 +890,25 @@ export default function Home() {
                   <details style={{ marginTop: '1rem' }}>
                     <summary style={{ 
                       cursor: 'pointer', 
-                      fontSize: '1.1rem', 
+                      fontSize: '1rem', 
                       fontWeight: '600', 
                       color: '#4b5563',
-                      padding: '0.5rem',
-                      backgroundColor: '#f9fafb',
-                      borderRadius: '0.375rem',
+                      padding: '0.75rem',
+                      backgroundColor: '#f3f4f6',
+                      borderRadius: '0.5rem',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.5rem'
+                      gap: '0.5rem',
+                      border: '1px solid #d1d5db'
                     }}>
-                      🤖 View Full Agent Terminal Session
-                      <span style={{ 
+                      🎬 Terminal Recording
+                      <div style={{ 
                         fontSize: '0.75rem', 
-                        backgroundColor: '#6b7280', 
-                        color: 'white', 
-                        padding: '0.25rem 0.5rem', 
-                        borderRadius: '0.25rem' 
+                        color: '#6b7280',
+                        marginLeft: 'auto'
                       }}>
-                        DETAILED
-                      </span>
+                        Watch the agent work (like a screen recording)
+                      </div>
                     </summary>
                     <div style={{
                       backgroundColor: '#0f172a',
@@ -936,26 +935,94 @@ export default function Home() {
                   cursor: 'pointer', 
                   fontSize: '1rem', 
                   fontWeight: '600', 
-                  color: '#6b7280',
-                  padding: '0.5rem',
-                  backgroundColor: '#f9fafb',
-                  borderRadius: '0.375rem'
+                  color: '#4b5563',
+                  padding: '0.75rem',
+                  backgroundColor: '#f3f4f6',
+                  borderRadius: '0.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  border: '1px solid #d1d5db'
                 }}>
-                  📄 View All Logs (Commands, Tests, etc.)
+                  📋 Structured Logs 
+                  <div style={{ 
+                    fontSize: '0.75rem', 
+                    color: '#6b7280',
+                    marginLeft: 'auto'
+                  }}>
+                    Browse by section: agent, tests, commands, files
+                  </div>
                 </summary>
-                <div style={{
-                  backgroundColor: '#1f2937',
-                  color: '#f3f4f6',
-                  padding: '1rem',
-                  borderRadius: '0.375rem',
-                  fontFamily: 'monospace',
-                  fontSize: '0.875rem',
-                  maxHeight: '600px',
-                  overflowY: 'auto',
-                  whiteSpace: 'pre-wrap',
-                  marginTop: '0.5rem'
-                }}>
-                  {logs || 'Loading logs...'}
+                
+                {/* Individual Log Sections - Much cleaner! */}
+                <div style={{ marginTop: '0.75rem' }}>
+                  {/* Parse and Display Each Section Individually - Dynamic based on what's actually in the logs */}
+                  {(() => {
+                    if (!logs) return null;
+                    
+                    // Find all sections in the logs
+                    const sectionMatches = logs.match(/=== ([^=]+) ===/g) || [];
+                    const sections = sectionMatches.map(match => match.replace(/=== | ===/g, ''));
+                    
+                    // Map section names to UI info
+                    const getSectionInfo = (name: string) => {
+                      if (name.includes('agent.log')) return { icon: '🤖', title: 'Agent Actions', desc: 'What the agent did' };
+                      if (name.includes('tests.log')) return { icon: '🧪', title: 'Test Results', desc: 'Did it work?' };
+                      if (name.includes('commands.txt')) return { icon: '⚡', title: 'Commands', desc: 'What was run' };
+                      if (name.includes('post-agent')) return { icon: '📁', title: 'Files Created', desc: 'What changed' };
+                      if (name.includes('post-test')) return { icon: '📊', title: 'Final State', desc: 'End result' };
+                      return { icon: '📄', title: name, desc: '' };
+                    };
+                    
+                    return sections.map(sectionName => {
+                      const { icon, title, desc } = getSectionInfo(sectionName);
+                      const escapedName = sectionName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                      const sectionPattern = new RegExp(`=== ${escapedName} ===([\\s\\S]*?)(?===|$)`);
+                      const match = logs.match(sectionPattern);
+                      const sectionContent = match ? match[1].trim() : '';
+                      
+                      if (!sectionContent) return null;
+                      
+                      return (
+                      <details key={sectionName} style={{ marginBottom: '0.5rem' }}>
+                        <summary style={{ 
+                          cursor: 'pointer', 
+                          fontSize: '0.875rem', 
+                          fontWeight: '500', 
+                          color: '#4b5563',
+                          padding: '0.5rem 0.75rem',
+                          backgroundColor: sectionContent.includes('passed') || sectionContent.includes('✅') ? '#f0f9ff' : '#f9fafb',
+                          borderRadius: '0.375rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          border: '1px solid #e5e7eb'
+                        }}>
+                          {icon} <strong>{title}</strong>
+                          <span style={{ fontSize: '0.75rem', color: '#6b7280', marginLeft: '0.5rem' }}>
+                            {desc}
+                          </span>
+                          {(sectionContent.includes('passed') || sectionContent.includes('✅')) && <span style={{ marginLeft: 'auto' }}>✅</span>}
+                          {(sectionContent.includes('failed') || sectionContent.includes('❌')) && <span style={{ marginLeft: 'auto' }}>❌</span>}
+                        </summary>
+                        <div style={{
+                          backgroundColor: '#1f2937',
+                          color: '#f3f4f6',
+                          padding: '1rem',
+                          borderRadius: '0.375rem',
+                          fontFamily: 'monospace',
+                          fontSize: '0.8rem',
+                          maxHeight: '400px',
+                          overflowY: 'auto',
+                          whiteSpace: 'pre-wrap',
+                          marginTop: '0.25rem'
+                        }}>
+                          {sectionContent || `No ${sectionName} data available`}
+                        </div>
+                      </details>
+                      );
+                    });
+                  })()}
                 </div>
               </details>
             </div>

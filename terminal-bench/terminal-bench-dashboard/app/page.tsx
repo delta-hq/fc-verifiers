@@ -987,6 +987,19 @@ export default function Home() {
                       const match = logs.match(sectionPattern);
                       const sectionContent = match ? match[1].trim() : '';
                       
+                      // Debug logging for commands.txt
+                      if (sectionName.includes('commands.txt') && typeof window !== 'undefined') {
+                        console.log('Commands section debug:', {
+                          sectionName,
+                          escapedName,
+                          regexPattern: sectionPattern.toString(),
+                          matchFound: !!match,
+                          contentLength: sectionContent.length,
+                          contentPreview: sectionContent.slice(0, 200) + '...',
+                          fullLogsLength: logs?.length || 0
+                        });
+                      }
+                      
                       if (!sectionContent) return null;
                       
                       return (

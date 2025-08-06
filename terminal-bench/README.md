@@ -1,15 +1,21 @@
-# Terminal-bench OpenCode Agent
+# Terminal-bench AI Agents
 
-This directory contains a custom OpenCode agent for terminal-bench that executes tasks instead of providing tutorials.
+This directory contains AI agents for terminal-bench evaluation:
+- **OpenCode Agent**: Modified CLI tool with execution-focused prompts  
+- **Claude Agent**: Direct API implementation using Claude Opus 4
 
 ## Quick Start
 
 ```bash
-# Run specific tasks
-./run-benchmark.sh --tasks hello-world fibonacci-server --concurrent 4
+# Run with OpenCode (default)
+./run-benchmark.sh --tasks hello-world fibonacci-server
+
+# Run with Claude direct API
+export OPENROUTER_API_KEY="your-key"
+./run-benchmark.sh --agent claude --tasks hello-world
 
 # Run all tasks
-./run-benchmark.sh
+./run-benchmark.sh --agent opencode  # or --agent claude
 
 # Review failed task
 ./review-task.sh fibonacci-server
@@ -39,6 +45,20 @@ The `opencode-setup.sh` script is automatically executed by terminal-bench insid
 3. If not found: Falls back to installing from npm (includes installing Node.js, etc.)
 
 The agent (`opencode_agent.py`) overrides `perform_task()` to copy the custom binary if it exists at `opencode/opencode-custom`.
+
+## Agent Comparison
+
+### OpenCode Agent
+- **Approach**: Wraps the OpenCode CLI tool, modifying its prompts
+- **Pros**: Can leverage OpenCode's existing features and tools
+- **Cons**: Complex build process, requires Bun and Docker
+- **Best for**: Tasks that benefit from OpenCode's tooling
+
+### Claude Agent  
+- **Approach**: Direct API calls with structured XML responses
+- **Pros**: Simple, clean implementation with full control
+- **Cons**: Requires OpenRouter API key, costs per API call
+- **Best for**: Complex reasoning tasks, when you need Opus 4's capabilities
 
 ## How We Fixed OpenCode
 

@@ -48,3 +48,15 @@ old/
 environments/aime2024/
 environments/aime2025/
 environments/reverse_text_mini/
+
+# Terminal-bench generated files
+terminal-bench/node_modules/
+terminal-bench/package.json
+terminal-bench/package-lock.json
+terminal-bench/dashboard-debug.log
+terminal-bench/test-results/
+terminal-bench/terminal-bench-dashboard/
+terminal-bench/terminal-bench-monitor/
+terminal-bench/*.sh
+!terminal-bench/run-benchmark.sh
+!terminal-bench/build-opencode.sh

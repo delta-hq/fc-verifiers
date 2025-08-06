@@ -964,13 +964,19 @@ export default function Home() {
                     const sectionMatches = logs.match(/^=== ([^=\n]+) ===$/gm) || [];
                     const sections = sectionMatches.map(match => match.replace(/^=== | ===$/g, ''));
                     
-                    // Map section names to UI info
+                    // Map section names to UI info - handle actual API section names
                     const getSectionInfo = (name: string) => {
-                      if (name.includes('agent.log')) return { icon: '🤖', title: 'Agent Actions', desc: 'What the agent did' };
-                      if (name.includes('tests.log')) return { icon: '🧪', title: 'Test Results', desc: 'Did it work?' };
-                      if (name.includes('commands.txt')) return { icon: '⚡', title: 'Commands', desc: 'What was run' };
-                      if (name.includes('post-agent')) return { icon: '📁', title: 'Files Created', desc: 'What changed' };
-                      if (name.includes('post-test')) return { icon: '📊', title: 'Final State', desc: 'End result' };
+                      // Agent logs (multiple formats)
+                      if (name.includes('Agent Log') || name.includes('agent.log')) return { icon: '🤖', title: 'Agent Actions', desc: 'What the agent did' };
+                      // Test results
+                      if (name.includes('tests.log') || name.includes('Test')) return { icon: '🧪', title: 'Test Results', desc: 'Did it work?' };
+                      // Commands (multiple formats)
+                      if (name.includes('Commands') || name.includes('commands.txt') || name.includes('Command History')) return { icon: '⚡', title: 'Commands', desc: 'What was run' };
+                      // File changes
+                      if (name.includes('post-agent') || name.includes('Files')) return { icon: '📁', title: 'Files Created', desc: 'What changed' };
+                      // Final state
+                      if (name.includes('post-test') || name.includes('Task Results')) return { icon: '📊', title: 'Final State', desc: 'End result' };
+                      // Default
                       return { icon: '📄', title: name, desc: '' };
                     };
                     

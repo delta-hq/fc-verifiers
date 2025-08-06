@@ -960,9 +960,9 @@ export default function Home() {
                   {(() => {
                     if (!logs) return null;
                     
-                    // Find all sections in the logs
-                    const sectionMatches = logs.match(/=== ([^=]+) ===/g) || [];
-                    const sections = sectionMatches.map(match => match.replace(/=== | ===/g, ''));
+                    // Find all sections in the logs - be more precise to avoid Python __name__ confusion
+                    const sectionMatches = logs.match(/^=== ([^=\n]+) ===$/gm) || [];
+                    const sections = sectionMatches.map(match => match.replace(/^=== | ===$/g, ''));
                     
                     // Map section names to UI info
                     const getSectionInfo = (name: string) => {

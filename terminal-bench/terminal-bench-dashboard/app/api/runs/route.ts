@@ -83,6 +83,9 @@ export async function GET() {
                         const trialDir = taskItems.find(i => i.startsWith('trial-') || i.includes('.1-of-1.'));
                         
                         if (trialDir) {
+                          // If we have a trial directory, task is at least running
+                          taskStatus = 'running';
+                          
                           // Check multiple possible locations for results
                           const possibleResultsPaths = [
                             path.join(taskPath, trialDir, 'results.json'),

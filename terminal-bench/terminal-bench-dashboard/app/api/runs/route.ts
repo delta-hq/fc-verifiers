@@ -55,7 +55,7 @@ export async function GET() {
               // Get task details from results
               tasks = results.results.map((r: any) => ({
                 name: r.task_id,
-                status: r.passed ? 'passed' : 'failed'
+                status: r.is_resolved ? 'passed' : 'failed'
               }));
               
               console.log(`[RUNS-API] Parsed tasks for ${runId}:`, tasks);

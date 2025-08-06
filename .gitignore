@@ -29,6 +29,7 @@ docs/build/
 wandb/
 outputs/
 logs/
+runs/
 
 # development
 local/

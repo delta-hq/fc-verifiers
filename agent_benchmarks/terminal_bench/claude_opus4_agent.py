@@ -9,20 +9,23 @@ Usage:
     python claude_opus4_agent.py
 """
 
-import json
 import os
+import logging
 import requests
+import json
+import re
 import time
-import sys
+from datetime import datetime
 from pathlib import Path
+from typing import List, Dict, Any
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
+from terminal_bench import Harness
 
 from terminal_bench.agents.base_agent import AgentResult, BaseAgent
 from terminal_bench.agents.failure_mode import FailureMode
 from terminal_bench.terminal.tmux_session import TmuxSession
 from terminal_bench.utils.logger import logger
-from terminal_bench.cli.tb.runs import create
 
 load_dotenv()
 
@@ -268,6 +271,7 @@ def run_evaluation():
     print(f"📁 Root directory: {root_dir}")
     
     # Add the root directory to Python path
+    import sys
     sys.path.insert(0, str(root_dir))
     
     # Use the absolute path for the import
@@ -276,13 +280,25 @@ def run_evaluation():
     
     # Run evaluation using Terminal-Bench Python API
     try:
-        results = create(
-            dataset="terminal-bench-core==0.1.1",
+        # Create output directory for results
+        timestamp = datetime.now().strftime("%Y-%m-%d__%H-%M-%S")
+        output_path = Path(f"runs/{timestamp}")  # Fixed: relative to current directory
+        output_path.mkdir(parents=True, exist_ok=True)
+        
+        # Create and run harness
+        harness = Harness(
+            output_path=output_path,
+            run_id=timestamp,
             agent_import_path=agent_import_path,
+            dataset_name="terminal-bench-core",  
+            dataset_version="head",  # Use latest pre-release version
             cleanup=True,
             n_concurrent_trials=1,  # Avoid API rate limits
-            task_ids=["crack-7z-hash.easy"],  # Only run this specific task
+            task_ids=["chess-best-move"],  # Only run this specific task
         )
+        
+        # Run the evaluation
+        results = harness.run()
         
         print("📊 Evaluation Results:")
         print(f"Results type: {type(results)}")

@@ -983,7 +983,7 @@ export default function Home() {
                     return sections.map(sectionName => {
                       const { icon, title, desc } = getSectionInfo(sectionName);
                       const escapedName = sectionName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                      const sectionPattern = new RegExp(`=== ${escapedName} ===([\\s\\S]*?)(?===|$)`);
+                      const sectionPattern = new RegExp(`=== ${escapedName} ===([\\s\\S]*?)(?=\\n=== |$)`);
                       const match = logs.match(sectionPattern);
                       const sectionContent = match ? match[1].trim() : '';
                       

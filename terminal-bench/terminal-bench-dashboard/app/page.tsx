@@ -960,45 +960,56 @@ export default function Home() {
                   {(() => {
                     if (!logs) return null;
                     
-                    // Find all sections in the logs - be more precise to avoid Python __name__ confusion
-                    const sectionMatches = logs.match(/^=== ([^=\n]+) ===$/gm) || [];
-                    const sections = sectionMatches.map(match => match.replace(/^=== | ===$/g, ''));
+                    // Simple split-based approach - split on EXACT section headers from the API
+                    const knownSections = [
+                      'Agent Log',           // Line 39 in API
+                      'Commands',            // Line 50 in API  
+                      'agent.log',           // Line 68 sessionFiles
+                      'tests.log',           // Line 68 sessionFiles
+                      'commands.txt',        // Line 84 duplicate!
+                      'Command History',     // Line 117
+                      'Task Results',        // Line 136
+                      'panes/post-agent.txt', // Line 100 panes
+                      'panes/post-test.txt'   // Line 100 panes
+                    ];
                     
-                    // Map section names to UI info - handle actual API section names
+                    // Split logs into sections using simple string splitting
+                    const sections: {name: string, content: string}[] = [];
+                    
+                    for (const sectionName of knownSections) {
+                      const sectionStart = logs.indexOf(`=== ${sectionName} ===`);
+                      if (sectionStart !== -1) {
+                        const contentStart = sectionStart + `=== ${sectionName} ===`.length;
+                        
+                        // Find the next section start
+                        let contentEnd = logs.length;
+                        for (const otherSection of knownSections) {
+                          if (otherSection === sectionName) continue;
+                          const nextSectionStart = logs.indexOf(`=== ${otherSection} ===`, contentStart);
+                          if (nextSectionStart !== -1 && nextSectionStart < contentEnd) {
+                            contentEnd = nextSectionStart;
+                          }
+                        }
+                        
+                        const content = logs.slice(contentStart, contentEnd).trim();
+                        if (content) {
+                          sections.push({ name: sectionName, content });
+                        }
+                      }
+                    }
+                    
+                    // Map section names to UI info
                     const getSectionInfo = (name: string) => {
-                      // Agent logs (multiple formats)
                       if (name.includes('Agent Log') || name.includes('agent.log')) return { icon: '🤖', title: 'Agent Actions', desc: 'What the agent did' };
-                      // Test results
                       if (name.includes('tests.log') || name.includes('Test')) return { icon: '🧪', title: 'Test Results', desc: 'Did it work?' };
-                      // Commands (multiple formats)
                       if (name.includes('Commands') || name.includes('commands.txt') || name.includes('Command History')) return { icon: '⚡', title: 'Commands', desc: 'What was run' };
-                      // File changes
                       if (name.includes('post-agent') || name.includes('Files')) return { icon: '📁', title: 'Files Created', desc: 'What changed' };
-                      // Final state
                       if (name.includes('post-test') || name.includes('Task Results')) return { icon: '📊', title: 'Final State', desc: 'End result' };
-                      // Default
                       return { icon: '📄', title: name, desc: '' };
                     };
                     
-                    return sections.map(sectionName => {
+                    return sections.map(({name: sectionName, content: sectionContent}) => {
                       const { icon, title, desc } = getSectionInfo(sectionName);
-                      const escapedName = sectionName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                      const sectionPattern = new RegExp(`=== ${escapedName} ===\\n([\\s\\S]*?)(?=\\n=== [^=\\n]+ ===|$)`);
-                      const match = logs.match(sectionPattern);
-                      const sectionContent = match ? match[1].trim() : '';
-                      
-                      // Debug logging for commands.txt
-                      if (sectionName.includes('commands.txt') && typeof window !== 'undefined') {
-                        console.log('Commands section debug:', {
-                          sectionName,
-                          escapedName,
-                          regexPattern: sectionPattern.toString(),
-                          matchFound: !!match,
-                          contentLength: sectionContent.length,
-                          contentPreview: sectionContent.slice(0, 200) + '...',
-                          fullLogsLength: logs?.length || 0
-                        });
-                      }
                       
                       if (!sectionContent) return null;
                       

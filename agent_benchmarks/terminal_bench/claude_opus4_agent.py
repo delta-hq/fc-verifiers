@@ -13,6 +13,7 @@ import json
 import os
 import requests
 import time
+import sys
 from pathlib import Path
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
@@ -143,10 +144,21 @@ def run_evaluation():
     # Set Docker for macOS
     os.environ['DOCKER_HOST'] = 'unix://' + os.path.expanduser('~/.docker/run/docker.sock')
     
+    # Get the absolute path to this file
+    current_file = Path(__file__).resolve()
+    current_dir = current_file.parent
+    root_dir = current_dir.parent.parent
+    
+    # Add the root directory to Python path
+    sys.path.insert(0, str(root_dir))
+    
+    # Use the absolute path for the import
+    agent_import_path = f"{current_file.stem}:ClaudeOpus4Agent"
+    
     # Run evaluation using Terminal-Bench Python API
     results = create(
         dataset="terminal-bench-core==0.1.1",
-        agent_import_path="agent_benchmarks.terminal_bench.agents.claude_opus4_agent:ClaudeOpus4Agent",
+        agent_import_path=agent_import_path,
         cleanup=True,
         n_concurrent_trials=1,  # Avoid API rate limits
         n_tasks=10,  # Run subset for testing

@@ -111,8 +111,12 @@ export async function GET() {
                               const agentLogPath = path.join(taskPath, trialDir, 'sessions', 'agent.log');
                               const agentLog = await fs.readFile(agentLogPath, 'utf-8');
                               
-                              // PRIORITY 1: Check for actual test results - these are definitive
-                              if (agentLog.includes('2 passed in') || agentLog.includes('PASSED ../tests/')) {
+                              // PRIORITY 1: Check for explicit success messages
+                              if (agentLog.includes('Task Completed Successfully') || agentLog.includes('Tests Passed!')) {
+                                taskStatus = 'passed';
+                              }
+                              // PRIORITY 2: Check for actual test results - these are definitive
+                              else if (agentLog.includes('2 passed in') || agentLog.includes('PASSED ../tests/')) {
                                 taskStatus = 'passed';
                               } else if (agentLog.includes('FAILED ../tests/')) {
                                 taskStatus = 'failed';

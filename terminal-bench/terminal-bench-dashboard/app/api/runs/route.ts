@@ -68,6 +68,7 @@ export async function GET() {
                 
                 // Get task directories
                 const items = await fs.readdir(runPath);
+                console.log(`[RUNS-API] ${runId} is running, found items:`, items);
                 for (const item of items) {
                   if (!['run_metadata.json', 'run.log', 'tb.lock', 'results.json'].includes(item)) {
                     const taskPath = path.join(runPath, item);
@@ -181,7 +182,9 @@ export async function GET() {
                     }
                   }
                 }
+                console.log(`[RUNS-API] ${runId} found ${tasks.length} tasks:`, tasks);
               } catch {
+                console.log(`[RUNS-API] ${runId} failed to access tb.lock, marking as failed`);
                 status = 'failed';
               }
             }

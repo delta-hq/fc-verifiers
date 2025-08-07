@@ -67,33 +67,33 @@ export default function MultiSelectDropdown({
         onClick={() => setIsOpen(!isOpen)}
         style={{
           width: '100%',
-          minHeight: '2.5rem',
-          padding: '0.5rem',
-          border: '1px solid #d1d5db',
-          borderRadius: '0.375rem',
-          fontSize: '1rem',
-          color: '#111827',
-          backgroundColor: 'white',
+          minHeight: '2rem',
+          padding: '0.25rem',
+          border: '1px solid #30363d',
+          backgroundColor: '#161b22',
+          color: '#c9d1d9',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '0.25rem'
+          gap: '0.25rem',
+          fontFamily: 'Monaco, monospace',
+          fontSize: '12px'
         }}
       >
         {selectedValues.length === 0 ? (
-          <span style={{ color: '#6b7280' }}>{placeholder}</span>
+          <span style={{ color: '#6e7681' }}>{placeholder}</span>
         ) : (
           <>
-            {selectedValues.slice(0, 3).map(value => (
+            {selectedValues.slice(0, 2).map(value => (
               <span
                 key={value}
                 style={{
-                  backgroundColor: '#dbeafe',
-                  color: '#1e40af',
-                  padding: '0.125rem 0.5rem',
-                  borderRadius: '0.25rem',
-                  fontSize: '0.875rem',
+                  backgroundColor: '#1f6feb',
+                  color: '#ffffff',
+                  border: '1px solid #1f6feb',
+                  padding: '0 0.25rem',
+                  fontSize: '11px',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.25rem'
@@ -108,24 +108,25 @@ export default function MultiSelectDropdown({
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: '#1e40af',
+                    color: '#ffffff',
                     cursor: 'pointer',
                     padding: '0',
-                    lineHeight: 1
+                    lineHeight: 1,
+                    fontFamily: 'inherit'
                   }}
                 >
-                  ×
+                  x
                 </button>
               </span>
             ))}
-            {selectedValues.length > 3 && (
-              <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>
-                +{selectedValues.length - 3} more
+            {selectedValues.length > 2 && (
+              <span style={{ color: '#6e7681', fontSize: '11px' }}>
+                +{selectedValues.length - 2} more
               </span>
             )}
           </>
         )}
-        <span style={{ marginLeft: 'auto', color: '#6b7280' }}>
+        <span style={{ marginLeft: 'auto', color: '#8b949e' }}>
           {isOpen ? '▲' : '▼'}
         </span>
       </div>
@@ -138,30 +139,30 @@ export default function MultiSelectDropdown({
             top: '100%',
             left: 0,
             right: 0,
-            backgroundColor: 'white',
-            border: '1px solid #d1d5db',
-            borderRadius: '0.375rem',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            backgroundColor: '#0d1117',
+            border: '1px solid #30363d',
             zIndex: 50,
             maxHeight: '400px',
             overflow: 'hidden',
-            marginTop: '0.25rem'
+            marginTop: '2px'
           }}
         >
           {/* Search input */}
-          <div style={{ padding: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ padding: '0.5rem', borderBottom: '1px solid #30363d' }}>
             <input
               type="text"
-              placeholder="Search tasks..."
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
                 width: '100%',
-                padding: '0.5rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '0.25rem',
-                fontSize: '0.875rem',
-                outline: 'none'
+                padding: '0.25rem',
+                border: '1px solid #30363d',
+                backgroundColor: '#161b22',
+                color: '#c9d1d9',
+                fontSize: '12px',
+                outline: 'none',
+                fontFamily: 'Monaco, monospace'
               }}
               onClick={(e) => e.stopPropagation()}
             />
@@ -169,45 +170,46 @@ export default function MultiSelectDropdown({
 
           {/* Action buttons */}
           <div style={{ 
-            padding: '0.5rem', 
-            borderBottom: '1px solid #e5e7eb',
+            padding: '0.25rem', 
+            borderBottom: '1px solid #30363d',
             display: 'flex',
-            gap: '0.5rem'
+            gap: '0.25rem'
           }}>
             <button
               onClick={selectAll}
               style={{
-                padding: '0.25rem 0.5rem',
-                backgroundColor: '#f3f4f6',
-                border: '1px solid #d1d5db',
-                borderRadius: '0.25rem',
-                fontSize: '0.75rem',
-                cursor: 'pointer'
+                padding: '0.125rem 0.25rem',
+                backgroundColor: '#161b22',
+                border: '1px solid #30363d',
+                color: '#58a6ff',
+                fontSize: '11px',
+                cursor: 'pointer',
+                fontFamily: 'Monaco, monospace'
               }}
             >
-              Select All
+              [ALL]
             </button>
             <button
               onClick={clearAll}
               style={{
-                padding: '0.25rem 0.5rem',
-                backgroundColor: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: '0.25rem',
-                fontSize: '0.75rem',
+                padding: '0.125rem 0.25rem',
+                backgroundColor: '#161b22',
+                border: '1px solid #da3633',
+                color: '#da3633',
+                fontSize: '11px',
                 cursor: 'pointer',
-                color: '#dc2626'
+                fontFamily: 'Monaco, monospace'
               }}
             >
-              Clear All
+              [CLEAR]
             </button>
           </div>
 
           {/* Categories */}
           {categories && (
-            <div style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', marginBottom: '0.5rem' }}>
-                Quick Select Categories:
+            <div style={{ padding: '0.25rem', borderBottom: '1px solid #30363d' }}>
+              <div style={{ fontSize: '11px', color: '#79c0ff', marginBottom: '0.25rem' }}>
+                CATEGORIES:
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
                 {Object.entries(categories).map(([categoryName, categoryTasks]) => (
@@ -215,13 +217,13 @@ export default function MultiSelectDropdown({
                     key={categoryName}
                     onClick={() => selectCategory(categoryTasks)}
                     style={{
-                      padding: '0.25rem 0.5rem',
-                      backgroundColor: '#eff6ff',
-                      border: '1px solid #bfdbfe',
-                      borderRadius: '0.25rem',
-                      fontSize: '0.75rem',
+                      padding: '0 0.25rem',
+                      backgroundColor: '#161b22',
+                      border: '1px solid #30363d',
+                      color: '#8b949e',
+                      fontSize: '11px',
                       cursor: 'pointer',
-                      color: '#1d4ed8'
+                      fontFamily: 'Monaco, monospace'
                     }}
                   >
                     {categoryName}
@@ -234,7 +236,7 @@ export default function MultiSelectDropdown({
           {/* Options list */}
           <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
             {filteredOptions.length === 0 ? (
-              <div style={{ padding: '1rem', color: '#6b7280', textAlign: 'center' }}>
+              <div style={{ padding: '0.5rem', color: '#6e7681', textAlign: 'center', fontSize: '12px' }}>
                 No tasks found
               </div>
             ) : (
@@ -243,33 +245,35 @@ export default function MultiSelectDropdown({
                   key={option}
                   onClick={() => toggleOption(option)}
                   style={{
-                    padding: '0.75rem',
+                    padding: '0.25rem 0.5rem',
                     cursor: 'pointer',
-                    backgroundColor: selectedValues.includes(option) ? '#dbeafe' : 'transparent',
-                    borderBottom: '1px solid #f3f4f6',
+                    backgroundColor: selectedValues.includes(option) ? '#161b22' : '#0d1117',
+                    borderBottom: '1px solid #21262d',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
-                    fontSize: '0.875rem'
+                    fontSize: '12px',
+                    fontFamily: 'Monaco, monospace',
+                    color: selectedValues.includes(option) ? '#58a6ff' : '#c9d1d9'
                   }}
                   onMouseEnter={(e) => {
                     if (!selectedValues.includes(option)) {
-                      (e.target as HTMLElement).style.backgroundColor = '#f9fafb';
+                      (e.target as HTMLElement).style.backgroundColor = '#161b22';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!selectedValues.includes(option)) {
-                      (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                      (e.target as HTMLElement).style.backgroundColor = '#0d1117';
                     }
                   }}
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedValues.includes(option)}
-                    readOnly
-                    style={{ margin: 0 }}
-                  />
-                  <span style={{ fontFamily: 'monospace' }}>{option}</span>
+                  <span style={{ 
+                    color: selectedValues.includes(option) ? '#58a6ff' : '#6e7681',
+                    fontFamily: 'Monaco, monospace'
+                  }}>
+                    [{selectedValues.includes(option) ? 'X' : ' '}]
+                  </span>
+                  <span>{option}</span>
                 </div>
               ))
             )}

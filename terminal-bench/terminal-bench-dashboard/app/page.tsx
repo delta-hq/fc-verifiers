@@ -35,8 +35,15 @@ export default function Home() {
     agent: 'claude',
     tasks: ['hello-world', 'fibonacci-server'],
     concurrent: '1',
-    platform: 'local' as 'local' | 'modal'
+    platform: 'local' as 'local' | 'modal',
+    modalParallel: '10',
+    modalModel: 'gpt-4o-mini'
   });
+  const [modalStatus, setModalStatus] = useState<{
+    available: boolean;
+    authenticated: boolean;
+    version?: string;
+  }>({ available: false, authenticated: false });
 
   // Fetch runs status
   const fetchRuns = async () => {
@@ -61,18 +68,38 @@ export default function Home() {
     }
   };
 
+  // Check Modal availability
+  const checkModalStatus = async () => {
+    try {
+      const response = await fetch('/api/modal');
+      const data = await response.json();
+      setModalStatus({
+        available: data.status === 'available',
+        authenticated: data.authenticated || false,
+        version: data.version
+      });
+    } catch (error) {
+      console.error('Failed to check Modal status:', error);
+      setModalStatus({ available: false, authenticated: false });
+    }
+  };
+
   // Start a new run
   const startRun = async () => {
     setLoading(true);
     setStartError('');
     try {
-      const endpoint = config.platform === 'modal' ? '/api/modal-run' : '/api/start-run';
+      const endpoint = config.platform === 'modal' ? '/api/modal' : '/api/start-run';
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...config,
-          tasks: config.platform === 'modal' ? config.tasks : config.tasks.join(' ') // Modal expects array, local expects string
+          taskIds: config.platform === 'modal' ? config.tasks : undefined,
+          tasks: config.platform === 'modal' ? undefined : config.tasks.join(' '),
+          agentType: config.agent === 'claude' ? 'claude' : 'opencode',
+          model: config.platform === 'modal' ? config.modalModel : undefined,
+          parallel: config.platform === 'modal' ? parseInt(config.modalParallel) : undefined
         })
       });
       const data = await response.json();
@@ -147,6 +174,13 @@ export default function Home() {
   useEffect(() => {
     fetchRuns(); // Initial load
   }, []);
+
+  // Check Modal status on mount and platform change
+  useEffect(() => {
+    if (config.platform === 'modal') {
+      checkModalStatus();
+    }
+  }, [config.platform]);
 
   // Auto-refresh only when polling is explicitly enabled
   useEffect(() => {
@@ -304,26 +338,95 @@ export default function Home() {
               />
             </div>
             
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.25rem', color: '#8b949e' }}>
-                Concurrent:
-              </label>
-              <input 
-                type="number"
-                style={{ 
-                  width: '100%', 
-                  padding: '0.25rem', 
-                  backgroundColor: '#161b22',
-                  color: '#c9d1d9',
-                  border: '1px solid #30363d',
-                  fontFamily: 'inherit'
-                }}
-                value={config.concurrent}
-                onChange={(e) => setConfig({...config, concurrent: e.target.value})}
-                min="1"
-                max="10"
-              />
-            </div>
+            {config.platform === 'local' ? (
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.25rem', color: '#8b949e' }}>
+                  Concurrent:
+                </label>
+                <input 
+                  type="number"
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.25rem', 
+                    backgroundColor: '#161b22',
+                    color: '#c9d1d9',
+                    border: '1px solid #30363d',
+                    fontFamily: 'inherit'
+                  }}
+                  value={config.concurrent}
+                  onChange={(e) => setConfig({...config, concurrent: e.target.value})}
+                  min="1"
+                  max="10"
+                />
+              </div>
+            ) : (
+              <>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', color: '#8b949e' }}>
+                    Model:
+                  </label>
+                  <select
+                    style={{ 
+                      width: '100%', 
+                      padding: '0.25rem', 
+                      backgroundColor: '#161b22',
+                      color: '#c9d1d9',
+                      border: '1px solid #30363d',
+                      fontFamily: 'inherit'
+                    }}
+                    value={config.modalModel}
+                    onChange={(e) => setConfig({...config, modalModel: e.target.value})}
+                  >
+                    <option value="gpt-4o-mini">GPT-4o Mini</option>
+                    <option value="gpt-4o">GPT-4o</option>
+                    <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+                    <option value="claude-3-opus">Claude 3 Opus</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', color: '#8b949e' }}>
+                    Parallel Tasks:
+                  </label>
+                  <input 
+                    type="number"
+                    style={{ 
+                      width: '100%', 
+                      padding: '0.25rem', 
+                      backgroundColor: '#161b22',
+                      color: '#c9d1d9',
+                      border: '1px solid #30363d',
+                      fontFamily: 'inherit'
+                    }}
+                    value={config.modalParallel}
+                    onChange={(e) => setConfig({...config, modalParallel: e.target.value})}
+                    min="1"
+                    max="50"
+                  />
+                </div>
+                {!modalStatus.available && (
+                  <div style={{
+                    padding: '0.5rem',
+                    border: '1px solid #f1fa8c',
+                    color: '#f1fa8c',
+                    fontSize: '12px',
+                    backgroundColor: '#1c1f24'
+                  }}>
+                    ⚠️ Modal not configured. Install: pip install modal
+                  </div>
+                )}
+                {modalStatus.available && !modalStatus.authenticated && (
+                  <div style={{
+                    padding: '0.5rem',
+                    border: '1px solid #f1fa8c',
+                    color: '#f1fa8c',
+                    fontSize: '12px',
+                    backgroundColor: '#1c1f24'
+                  }}>
+                    ⚠️ Modal not authenticated. Run: modal token new
+                  </div>
+                )}
+              </>
+            )}
             
             <button
               onClick={startRun}

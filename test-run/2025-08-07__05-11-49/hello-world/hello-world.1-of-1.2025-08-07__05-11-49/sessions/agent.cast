@@ -1,0 +1,10 @@
+{"version": 2, "width": 160, "height": 40, "timestamp": 1754568714, "env": {"SHELL": "/bin/bash", "TERM": "tmux-256color"}}
+[0.001798, "o", "\u001b[?2004hroot@7034bbaa8085:/app# "]
+[0.97507, "i", "clear\r"]
+[0.97534, "o", "clear\r\n\u001b[?2004l\r"]
+[0.976337, "o", "\u001b[H\u001b[J\u001b[3J\u001b[?2004hroot@7034bbaa8085:/app# "]
+[1.111823, "i", "bash /oracle/solution.sh; tmux wait -S done\r"]
+[1.111949, "o", "bash /oracle/solution.sh; tmux wait -S done\r\n\u001b[?2004l\r"]
+[1.115684, "o", "\u001b[?2004hroot@7034bbaa8085:/app# "]
+[9.745578, "i", "\u0004"]
+[9.745728, "o", "\u001b[?2004l\r\r\nexit\r\n"]

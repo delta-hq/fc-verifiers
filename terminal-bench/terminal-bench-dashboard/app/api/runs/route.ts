@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 
+const MODAL_ENDPOINT = process.env.MODAL_ENDPOINT || 'https://openblocklabs--terminal-bench-test-fastapi-app.modal.run';
+
+// Store for Modal batch IDs (in a real app, this would be in a database)
+let modalBatches: string[] = [];
+
 export async function GET() {
   try {
     // Path to runs directory (adjust based on where dashboard is deployed)
@@ -200,6 +205,7 @@ export async function GET() {
               agent,
               model,
               concurrent,
+              platform: 'local', // Tag local runs
               duration: startTime && endTime ? 
                 Math.round((new Date(endTime).getTime() - new Date(startTime).getTime()) / 1000) : 
                 (startTime ? Math.round((Date.now() - new Date(startTime).getTime()) / 1000) : undefined)
@@ -211,13 +217,93 @@ export async function GET() {
           })
       );
       
-      return NextResponse.json({ runs });
+      // Also fetch Modal runs
+      const modalRuns = await fetchModalRuns();
+      
+      // Put Modal runs first, then local runs
+      const allRuns = [...modalRuns, ...runs];
+      
+      return NextResponse.json({ runs: allRuns });
     } catch (error) {
-      // Runs directory doesn't exist yet
-      return NextResponse.json({ runs: [] });
+      // Runs directory doesn't exist yet, but still check Modal
+      const modalRuns = await fetchModalRuns();
+      return NextResponse.json({ runs: modalRuns });
     }
   } catch (error) {
     console.error('Error fetching runs:', error);
     return NextResponse.json({ error: 'Failed to fetch runs' }, { status: 500 });
+  }
+}
+
+// Fetch Modal runs
+async function fetchModalRuns() {
+  console.log('[FETCH-MODAL] Starting to fetch Modal runs...');
+  const modalRuns = [];
+  
+  // In a real app, we'd get this from a database. For now, use known batch IDs
+  const recentBatches = [
+    'batch_20250807_050955_aae54b44', // Your 4 tasks - LATEST
+    'batch_20250807_050500_922c6537', // Latest from logs - 2 tasks
+    'batch_20250807_050401_9a30782c', // hello-world
+    'batch_20250807_045924_efc485d1', // Latest batch - 2 tasks passed
+    'batch_20250807_044912_950d5dbb', // setup-dev-environment passed
+    'batch_20250807_044444_6d51ffaa',
+    'batch_20250807_044327_8bb24d81',
+    'batch_20250807_044217_c85ed451',
+    'batch_20250807_044331_e5a7e268'
+  ];
+  
+  for (const batchId of recentBatches) {
+    try {
+      const response = await fetch(`${MODAL_ENDPOINT}/status/${batchId}`);
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Convert Modal batch to run format
+        const modalRun = {
+          id: batchId,
+          status: data.status === 'completed' ? 'completed' : 
+                 data.status === 'running' ? 'running' : 'failed',
+          accuracy: data.total > 0 ? data.passed / data.total : undefined,
+          tasks: Object.keys(data.results?.tasks || {}).map(taskId => ({
+            name: taskId,
+            status: data.results.tasks[taskId]?.passed ? 'passed' : 'failed'
+          })),
+          timestamp: data.results?.start_time || new Date().toISOString(),
+          startTime: data.results?.start_time,
+          endTime: data.results?.end_time,
+          agent: 'modal',
+          model: 'cloud',
+          platform: 'modal',
+          duration: data.results?.end_time && data.results?.start_time ? 
+            Math.round((new Date(data.results.end_time).getTime() - new Date(data.results.start_time).getTime()) / 1000) : 
+            undefined
+        };
+        
+        modalRuns.push(modalRun);
+      }
+    } catch (error) {
+      console.log(`Failed to fetch Modal batch ${batchId}:`, error.message);
+    }
+  }
+  
+  console.log(`[FETCH-MODAL] Returning ${modalRuns.length} Modal runs`);
+  return modalRuns;
+}
+
+// Register Modal batch
+export async function POST(request: Request) {
+  try {
+    const { batchId } = await request.json();
+    if (batchId && !modalBatches.includes(batchId)) {
+      modalBatches.push(batchId);
+      // Keep only last 50 batches
+      if (modalBatches.length > 50) {
+        modalBatches = modalBatches.slice(-50);
+      }
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to register batch' }, { status: 500 });
   }
 }

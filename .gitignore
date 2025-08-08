@@ -55,7 +55,8 @@ terminal-bench/package.json
 terminal-bench/package-lock.json
 terminal-bench/dashboard-debug.log
 terminal-bench/test-results/
-terminal-bench/terminal-bench-dashboard/
+terminal-bench/terminal-bench-dashboard/node_modules/
+terminal-bench/terminal-bench-dashboard/.next/
 terminal-bench/terminal-bench-monitor/
 terminal-bench/*.sh
 !terminal-bench/run-benchmark.sh

@@ -1,0 +1,29 @@
+{
+    "run_id": "2025-08-07__05-11-49",
+    "uuid": "7bfa9c8c-81c1-4e5a-b59f-3acf1ef5b325",
+    "dataset_path": null,
+    "dataset_name": "terminal-bench-core",
+    "dataset_version": "head",
+    "output_path": "/Users/daljeet/Documents/fc-verifiers/test-run",
+    "agent_name": "oracle",
+    "no_rebuild": false,
+    "cleanup": false,
+    "log_level": 20,
+    "task_ids": [
+        "hello-world"
+    ],
+    "exclude_task_ids": null,
+    "n_tasks": null,
+    "n_concurrent_trials": 4,
+    "n_attempts": 1,
+    "dataset_size": 1,
+    "accuracy": 1.0,
+    "model_name": "Oracle",
+    "start_time": "2025-08-07T12:11:52.845882+00:00",
+    "end_time": "2025-08-07T12:12:14.987743+00:00",
+    "commit_hash": "e57ea724e954287ff3dce563980ae4d24041c02d",
+    "username": "daljeet",
+    "s3_bucket": null,
+    "agent_kwargs": null,
+    "pass_at_k": {}
+}

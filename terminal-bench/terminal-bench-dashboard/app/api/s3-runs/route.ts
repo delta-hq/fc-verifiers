@@ -33,23 +33,43 @@ export async function GET() {
         
         const taskId = taskPath.split('/')[1];
         
-        // Try to get summary.json to check status
+        // Try to get terminal-bench.log to extract real data
         try {
-          const summaryCommand = new ListObjectsV2Command({
+          const { GetObjectCommand } = await import('@aws-sdk/client-s3');
+          const logCommand = new GetObjectCommand({
             Bucket: 'terminal-bench-results-522495932155',
-            Prefix: `${taskPath}summary.json`
+            Key: `${taskPath.replace('/', '')}terminal-bench.log`
           });
-          const summaryResponse = await s3Client.send(summaryCommand);
+          const logResponse = await s3Client.send(logCommand);
+          const logContent = await logResponse.Body?.transformToString();
           
-          if (summaryResponse.Contents && summaryResponse.Contents.length > 0) {
-            tasks.push({
-              taskId,
-              status: 'completed', // We'll get actual status from summary if needed
-              lastModified: summaryResponse.Contents[0].LastModified
-            });
+          // Extract accuracy from logs
+          let accuracy = null;
+          let status = 'unknown';
+          
+          if (logContent) {
+            // Look for accuracy line: "| Accuracy          | 100.00% |"
+            const accuracyMatch = logContent.match(/\|\s*Accuracy\s*\|\s*([\d.]+)%\s*\|/);
+            if (accuracyMatch) {
+              accuracy = parseFloat(accuracyMatch[1]);
+            }
+            
+            // Check if task passed
+            if (logContent.includes('✓') && accuracyMatch) {
+              status = accuracy > 0 ? 'passed' : 'failed';
+            } else if (logContent.includes('Results Summary:')) {
+              status = 'completed';
+            }
           }
+          
+          tasks.push({
+            taskId,
+            status,
+            accuracy,
+            lastModified: new Date()
+          });
         } catch (e) {
-          // Task might still be running or failed
+          // Fallback to basic info
           tasks.push({
             taskId,
             status: 'unknown',

@@ -108,9 +108,8 @@ export default function Home() {
             name: task.taskId,
             status: 'completed'
           })),
-          accuracy: 100, // We'll improve this later
           timestamp: new Date(batch.lastModified).toISOString(),
-          platform: 'ec2-batch', // Use same platform name for consistency
+          platform: 'ec2-batch',
           taskCount: batch.taskCount,
           batchId: batch.batchId
         }));
@@ -170,6 +169,48 @@ export default function Home() {
       document.body.removeChild(textArea);
       setCopyButtonText('COPIED!');
       setTimeout(() => setCopyButtonText('COPY'), 2000);
+    }
+  };
+
+  // Copy all task data including status and logs
+  const copyAllTaskData = async () => {
+    if (selectedRun && selectedTask && selectedRunData) {
+      try {
+        const taskInfo = selectedRunData.tasks.find(t => t.name === selectedTask);
+        const runInfo = selectedRunData;
+        
+        const allData = `=== TASK SUMMARY ===\n` +
+          `Task: ${selectedTask}\n` +
+          `Status: ${taskInfo?.status || 'unknown'}\n` +
+          `Batch: ${runInfo.id}\n` +
+          `Platform: ${runInfo.platform || 'local'}\n` +
+          `Agent: ${runInfo.agent || 'N/A'}\n` +
+          `Model: ${runInfo.model || 'N/A'}\n` +
+          `Accuracy: ${runInfo.accuracy?.toFixed(1) || 'N/A'}%\n` +
+          `Timestamp: ${runInfo.timestamp || runInfo.launchTime || 'N/A'}\n` +
+          `Log File: ${selectedLogFile}\n` +
+          `\n=== LOGS ===\n` +
+          (logs || 'No logs available') +
+          `\n\n=== END ===`;
+        
+        await navigator.clipboard.writeText(allData);
+        setCopyButtonText('ALL COPIED!');
+        setTimeout(() => setCopyButtonText('COPY'), 3000);
+      } catch (error) {
+        console.error('Failed to copy all task data:', error);
+        // Fallback
+        const taskInfo = selectedRunData.tasks.find(t => t.name === selectedTask);
+        const runInfo = selectedRunData;
+        const allData = `Task: ${selectedTask}, Status: ${taskInfo?.status}, Batch: ${runInfo.id}\n\nLogs:\n${logs || 'No logs'}`;
+        const textArea = document.createElement('textarea');
+        textArea.value = allData;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        setCopyButtonText('ALL COPIED!');
+        setTimeout(() => setCopyButtonText('COPY'), 3000);
+      }
     }
   };
 
@@ -1110,7 +1151,9 @@ export default function Home() {
                         <option value="results.json">results.json</option>
                         <option value="run.log">run.log</option>
                         <option value="run_metadata.json">run_metadata.json</option>
-                        <option value="commands.txt">commands.txt</option>
+                        <option value="commands.txt">commands.txt (agent commands)</option>
+                        <option value="sessions/agent.log">sessions/agent.log (full agent session)</option>
+                        <option value="sessions/tests.log">sessions/tests.log (test execution)</option>
                       </select>
                       <button
                         onClick={() => fetchLogs(selectedRun!, selectedTask, selectedLogFile)}
@@ -1149,20 +1192,36 @@ export default function Home() {
                           <span style={{ color: '#6e7681' }}>[...] Processing</span>
                         )}
                       </div>
-                      <button
-                        onClick={copyLogs}
-                        style={{
-                          padding: '0.25rem 0.5rem',
-                          backgroundColor: copyButtonText === 'COPIED!' ? '#238636' : '#161b22',
-                          color: copyButtonText === 'COPIED!' ? '#ffffff' : '#8b949e',
-                          border: '1px solid #30363d',
-                          cursor: 'pointer',
-                          fontFamily: 'inherit',
-                          fontSize: '11px'
-                        }}
-                      >
-                        {copyButtonText}
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          onClick={copyLogs}
+                          style={{
+                            padding: '0.25rem 0.5rem',
+                            backgroundColor: copyButtonText === 'COPIED!' ? '#238636' : '#161b22',
+                            color: copyButtonText === 'COPIED!' ? '#ffffff' : '#8b949e',
+                            border: '1px solid #30363d',
+                            cursor: 'pointer',
+                            fontFamily: 'inherit',
+                            fontSize: '11px'
+                          }}
+                        >
+                          {copyButtonText === 'ALL COPIED!' ? 'COPIED!' : copyButtonText}
+                        </button>
+                        <button
+                          onClick={copyAllTaskData}
+                          style={{
+                            padding: '0.25rem 0.5rem',
+                            backgroundColor: copyButtonText === 'ALL COPIED!' ? '#238636' : '#21262d',
+                            color: copyButtonText === 'ALL COPIED!' ? '#ffffff' : '#79c0ff',
+                            border: '1px solid #30363d',
+                            cursor: 'pointer',
+                            fontFamily: 'inherit',
+                            fontSize: '11px'
+                          }}
+                        >
+                          COPY ALL
+                        </button>
+                      </div>
                     </div>
                   )}
                   

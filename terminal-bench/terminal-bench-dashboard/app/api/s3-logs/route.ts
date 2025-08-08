@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       )?.Key?.split('/')[2];
       
       if (runDir) {
-        if (logFile === 'commands.txt') {
+        if (logFile === 'commands.txt' || logFile.startsWith('sessions/')) {
           s3Key = `${batchId}/${taskId}/${runDir}/${taskId}/${taskId}.1-of-1.${runDir}/${logFile}`;
         } else {
           s3Key = `${batchId}/${taskId}/${runDir}/${logFile}`;
